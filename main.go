@@ -81,8 +81,6 @@ func main() {
 	hasher.Write(hashData)
 	revision := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 
-	fmt.Println(revision)
-	os.Exit(0)
 	response, err := http.Post(fmt.Sprintf("%s/api/v1/var?key=%s", reeveAPI, url.QueryEscape(revisionVar)), "text/plain", strings.NewReader(revision))
 	if err != nil {
 		panic(fmt.Sprintf("error setting revision var - %s", err))
