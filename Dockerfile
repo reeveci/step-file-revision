@@ -14,7 +14,7 @@ COPY --chmod=755 --from=builder /usr/local/bin/reeve-step /usr/local/bin/
 
 WORKDIR /reeve/src
 
-# FILES: Space separated list of files to be included (shell syntax)
+# FILES: Space separated list of file patterns (see https://pkg.go.dev/path/filepath#Match) to be searched (shell syntax)
 ENV FILES=
 # REVISION_VAR: Name of a runtime variable for setting the files' revision to
 ENV REVISION_VAR=FILE_REV

@@ -23,12 +23,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	files, err := shlex.Split(os.Getenv("FILES"))
+	filePatterns, err := shlex.Split(os.Getenv("FILES"))
 	if err != nil {
-		panic(fmt.Sprintf("error parsing file list - %s", err))
+		panic(fmt.Sprintf("error parsing file pattern list - %s", err))
 	}
-	if len(files) == 0 {
-		panic("no files specified")
+	files := make([]string, 0, len(filePatterns))
+	for _, pattern := range filePatterns {
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			panic(fmt.Sprintf(`error parsing file pattern "%s" - %s`, pattern, err))
+		}
+		files = append(files, matches...)
 	}
 
 	revisionVar := os.Getenv("REVISION_VAR")
@@ -36,8 +41,8 @@ func main() {
 		revisionVar = "FILE_REV"
 	}
 
-	revs := make([]RevisionInfo, len(files))
-	for i, name := range files {
+	revs := make([]RevisionInfo, 0, len(files))
+	for _, name := range files {
 		path, err := filepath.Abs(name)
 		if err != nil {
 			panic(fmt.Sprintf(`error determining absolute path for "%s" - %s`, name, err))
@@ -47,7 +52,12 @@ func main() {
 			panic(fmt.Sprintf(`error reading file information for "%s" - %s`, name, err))
 		}
 		if !file.Mode().IsRegular() {
-			panic(fmt.Sprintf(`error reading file "%s" - not a regular file`, name))
+			if file.Mode().Type().IsDir() {
+				fmt.Printf("skipping directory \"%s\"\n", path)
+			} else {
+				fmt.Printf("skipping non regular file \"%s\"\n", path)
+			}
+			continue
 		}
 		contents, err := os.ReadFile(path)
 		if err != nil {
@@ -60,13 +70,14 @@ func main() {
 		} else {
 			panic(fmt.Sprintf(`error reading ownership information for "%s"`, name))
 		}
-		revs[i] = RevisionInfo{
+		fmt.Printf("including file \"%s\"\n", name)
+		revs = append(revs, RevisionInfo{
 			Uid:     uid,
 			Gid:     gid,
 			Mode:    uint32(file.Mode()),
 			Name:    path,
 			Content: contents,
-		}
+		})
 	}
 
 	sort.Slice(revs, func(i, j int) bool {
