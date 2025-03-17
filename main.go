@@ -35,6 +35,7 @@ func main() {
 		}
 		files = append(files, matches...)
 	}
+	files = distinct(files)
 
 	revisionVar := os.Getenv("REVISION_VAR")
 	if revisionVar == "" {
@@ -107,4 +108,16 @@ type RevisionInfo struct {
 	Mode     uint32
 	Name     string
 	Content  []byte
+}
+
+func distinct[T comparable](items []T) []T {
+	keys := make(map[T]struct{})
+	result := make([]T, 0, len(items))
+	for _, item := range items {
+		if _, exists := keys[item]; !exists {
+			keys[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
 }
