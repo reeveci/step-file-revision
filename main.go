@@ -44,14 +44,14 @@ func main() {
 	}
 
 	revs := make([]RevisionInfo, 0, len(files))
-	for _, name := range files {
-		path, err := filepath.Abs(name)
+	for _, filename := range files {
+		path, err := filepath.Abs(filename)
 		if err != nil {
-			panic(fmt.Sprintf(`error determining absolute path for "%s" - %s`, name, err))
+			panic(fmt.Sprintf(`error determining absolute path for "%s" - %s`, filename, err))
 		}
 		file, err := os.Stat(path)
 		if err != nil {
-			panic(fmt.Sprintf(`error reading file information for "%s" - %s`, name, err))
+			panic(fmt.Sprintf(`error reading file information for "%s" - %s`, filename, err))
 		}
 		if !file.Mode().IsRegular() {
 			fmt.Printf("skipping non regular file \"%s\"\n", path)
@@ -59,16 +59,16 @@ func main() {
 		}
 		contents, err := os.ReadFile(path)
 		if err != nil {
-			panic(fmt.Sprintf(`error reading file "%s" - %s`, name, err))
+			panic(fmt.Sprintf(`error reading file "%s" - %s`, filename, err))
 		}
 		var uid, gid int
 		if stat, ok := file.Sys().(*syscall.Stat_t); ok {
 			uid = int(stat.Uid)
 			gid = int(stat.Gid)
 		} else {
-			panic(fmt.Sprintf(`error reading ownership information for "%s"`, name))
+			panic(fmt.Sprintf(`error reading ownership information for "%s"`, filename))
 		}
-		fmt.Printf("including file \"%s\"\n", name)
+		fmt.Printf("including file \"%s\"\n", filename)
 		revs = append(revs, RevisionInfo{
 			Uid:     uid,
 			Gid:     gid,
