@@ -13,6 +13,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/google/shlex"
 )
 
@@ -29,7 +30,7 @@ func main() {
 	}
 	files := make([]string, 0, len(filePatterns))
 	for _, pattern := range filePatterns {
-		matches, err := filepath.Glob(pattern)
+		matches, err := doublestar.FilepathGlob(pattern, doublestar.WithFilesOnly())
 		if err != nil {
 			panic(fmt.Sprintf(`error parsing file pattern "%s" - %s`, pattern, err))
 		}
@@ -53,11 +54,7 @@ func main() {
 			panic(fmt.Sprintf(`error reading file information for "%s" - %s`, name, err))
 		}
 		if !file.Mode().IsRegular() {
-			if file.Mode().Type().IsDir() {
-				fmt.Printf("skipping directory \"%s\"\n", path)
-			} else {
-				fmt.Printf("skipping non regular file \"%s\"\n", path)
-			}
+			fmt.Printf("skipping non regular file \"%s\"\n", path)
 			continue
 		}
 		contents, err := os.ReadFile(path)
