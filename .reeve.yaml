@@ -24,7 +24,7 @@ steps:
   - name: Build image
     task: "@docker/build"
     params:
-      DOCKER_LOGIN_REGISTRIES: { env: docker/hub/login }
+      DOCKER_LOGIN_REGISTRIES: { env: docker/hub/reeve/login }
       NAME: docker.io/reeveci/step-file-revision
       TAG: { var: STEP_VERSION }
       PLATFORM: amd64
